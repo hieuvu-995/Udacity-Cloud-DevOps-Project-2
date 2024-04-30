@@ -46,10 +46,6 @@ Resources:
                   FromPort: 80
                   ToPort: 80
                   CidrIp: 0.0.0.0/0
-                - IpProtocol: tcp
-                  FromPort: 22
-                  ToPort: 22
-                  CidrIp: 0.0.0.0/0
             SecurityGroupEgress: 
                 - IpProtocol: tcp
                   FromPort: 0
@@ -95,41 +91,44 @@ Resources:
                 - Ref: EC2Policy
 
     # Launch configuration for EC2 instances.
-    WebServerLaunchConfig:
-        Type: AWS::AutoScaling::LaunchConfiguration
+    WebServerLaunchTemplate:
+        Type: AWS::EC2::LaunchTemplate
         Properties:
-            UserData:
-                Fn::Base64: !Sub |
-                    #!/bin/bash
-                    apt-get update -y
-                    apt-get install unzip awscli -y
-                    apt-get install apache2 -y
-                    systemctl start apache2.service
-                    cd /var/www/html
-                    aws s3 cp s3://udagram-project2/index.html .
-            ImageId: !Ref ServerAMIId
-            IamInstanceProfile: !Ref InstanceProfileRole
-            SecurityGroups:
-                - Ref: WebServerSecurityGroup
-            InstanceType: 
-                !Ref InstanceType
-            BlockDeviceMappings:
-                - DeviceName: /dev/sda1
-                  Ebs:
-                      VolumeSize: '10'
-                      VolumeType: 'gp2'
+            LaunchTemplateName: WebServerLaunchTemplate
+            LaunchTemplateData:
+                UserData:
+                    Fn::Base64: !Sub |
+                        #!/bin/bash
+                        apt-get update -y
+                        apt-get install unzip awscli -y
+                        apt-get install apache2 -y
+                        systemctl start apache2.service
+                        cd /var/www/html
+                        aws s3 cp s3://udagram-project2/index.html .
+                ImageId: !Ref ServerAMIId
+                IamInstanceProfile: 
+                    Name: !Ref InstanceProfileRole
+                SecurityGroupIds:
+                    - !Ref WebServerSecurityGroup
+                InstanceType: !Ref InstanceType
+                BlockDeviceMappings:
+                    - DeviceName: /dev/sda1
+                      Ebs:
+                        VolumeSize: '10'
+                        VolumeType: 'gp2'
 
     WebServerGroup:
         Type: AWS::AutoScaling::AutoScalingGroup
         Properties:
             VPCZoneIdentifier:
                 - Fn::ImportValue: !Sub "${EnvironmentName}-PRIV-SUBS"
-            LaunchConfigurationName:
-                Ref: WebServerLaunchConfig
+            LaunchTemplate:
+                LaunchTemplateId: !Ref WebServerLaunchTemplate
+                Version: !GetAtt WebServerLaunchTemplate.LatestVersionNumber
             MinSize: '4'
             MaxSize: '4'
             TargetGroupARNs:
-                - Ref: WebServerTargetGroup
+                - !Ref WebServerTargetGroup
 
     WebServerLB:
         Type: AWS::ElasticLoadBalancingV2::LoadBalancer
