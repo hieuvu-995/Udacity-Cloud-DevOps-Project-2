@@ -9,7 +9,7 @@ $sh scripts/create.sh udagram-project-2-network-stack network.yml network-params
 ```
 - Create servers
 ```
-$ scripts/create.sh udagram-project-2-servers-stack servers.yml servers-params.json
+$sh scripts/create.sh udagram-project-2-servers-stack servers.yml servers-params.json
 ```
 
 ## Update
@@ -25,4 +25,4 @@ $sh scripts/delete.sh *stack-name
 ```
 
 # Endpoint Link :
-http://udagra-webse-8ywercqehqya-478143780.us-east-1.elb.amazonaws.com/
+http://udagra-webse-5bil4yyatul5-464364119.us-east-1.elb.amazonaws.com/

@@ -73,4 +73,4 @@ $sh scripts/delete.sh *stack-name
 ```
 
 # Endpoint Link :
-http://udagra-webse-8ywercqehqya-478143780.us-east-1.elb.amazonaws.com/
+http://udagra-webse-5bil4yyatul5-464364119.us-east-1.elb.amazonaws.com/
